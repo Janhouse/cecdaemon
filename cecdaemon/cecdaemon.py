@@ -38,19 +38,19 @@ class CecDaemon():
         try:
             tvconf = conf._sections['tv']
             television = Tv(cec, tvconf)
-        except AttributeError:
+        except (AttributeError, KeyError):
             television = Tv(cec, None)
 
         try:
             triggerconf = conf._sections['triggers']
             trigger = Trigger(cec, triggerconf)
-        except AttributeError:
+        except (AttributeError, KeyError):
             logging.warning('No triggers section found in config, triggers disabled')
 
         try:
             keymap = conf._sections['keymap']
             remote = Remote(cec, keymap)
-        except AttributeError:
+        except (AttributeError, KeyError):
             remote = Remote(cec, None)
 
         if conf is not None:
@@ -65,7 +65,7 @@ class CecDaemon():
                     callback = (CustomCommand(cmd, htime))
                     remote.add_callback(callback.run_command, int(key))
 
-                except AttributeError:
+                except (AttributeError, KeyError):
                     logging.warning('Callback for %s not created, check format', name)
 
     def _setup_logging(self):
