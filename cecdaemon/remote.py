@@ -115,11 +115,4 @@ class Remote:
         self.callbacks[key] = function
         logging.debug('Added callback')
         logging.debug(self.callbacks)
-
-
-def log_cb(event, *args):
-    print("Got event", event, "with data", args)
-
-
-def test(event, *arg):
-    print("test")
+	
