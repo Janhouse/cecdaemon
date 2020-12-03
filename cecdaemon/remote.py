@@ -28,6 +28,7 @@ class Remote:
 
         # add callback for keypresses
         cec.add_callback(self.eventrouter, cec.EVENT_KEYPRESS)
+        cec.add_callback(self.unpress_workaround, cec.EVENT_COMMAND)
 
         # setup the uinput device
         devicekeys = []
@@ -40,6 +41,14 @@ class Remote:
             devicekeys.append(getattr(uinput, value))
         self.device = uinput.Device(devicekeys)
         logging.info('Remote initialized')
+
+    def unpress_workaround(self, event, data):
+        if self.keycode != None and self.keystate != None and data['opcode'] == 69:
+            print("Unpressing key")
+            self.device.emit(keycode, 0)
+            self.keycode = None
+            self.keystate = None
+        return true
 
     def eventrouter(self, event, key, state):
         """ Takes a cec event and routes it to the appropriate handler
@@ -74,6 +83,10 @@ class Remote:
             logging.debug('%i is mapped to %s', key, self.keymap[str(key)])
             logging.debug('Key %i down', key)
             self.keystate = "down"
+            self.keycode=keycode
+            if self.keycode != None and self.keycode != keycode:
+                self.device.emit(self.keycode, 0)
+            self.keycode=keycode
             self.device.emit(keycode, 1)
 
         if state > 0:
@@ -81,9 +94,13 @@ class Remote:
             if self.keystate is None:
                 logging.debug('Key %i down', key)
                 self.device.emit(keycode, 1)
+                if self.keycode != None and self.keycode != keycode:
+                    self.device.emit(self.keycode, 0)
+                self.keycode=keycode
 
             logging.debug('Key %i up after %ims', key, state)
             self.device.emit(keycode, 0)
+            self.keycode = None
             self.keystate = None
 
     def add_callback(self, function, key):
@@ -98,3 +115,11 @@ class Remote:
         self.callbacks[key] = function
         logging.debug('Added callback')
         logging.debug(self.callbacks)
+
+
+def log_cb(event, *args):
+    print("Got event", event, "with data", args)
+
+
+def test(event, *arg):
+    print("test")
