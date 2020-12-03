@@ -44,7 +44,7 @@ class Remote:
 
     def unpress_workaround(self, event, data):
         if self.keycode != None and self.keystate != None and data['opcode'] == 69:
-            print("Unpressing key")
+            logging.info('Unpressing key')
             self.device.emit(keycode, 0)
             self.keycode = None
             self.keystate = None
